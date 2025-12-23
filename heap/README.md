@@ -12,12 +12,12 @@ nix profile install -f simpleheap.nix
 The following binaries will be installed with their revelent glibc versions configured: 
 
 ```
-simpleheap-2.23  
-simpleheap-2.24  
-simpleheap-2.26  
-simpleheap-2.27  
-simpleheap-2.30  
-simpleheap-2.35
+simpleheap-glibc-2.23  
+simpleheap-glibc-2.24  
+simpleheap-glibc-2.26  
+simpleheap-glibc-2.27  
+simpleheap-glibc-2.30  
+simpleheap-glibc-2.35
 ```
 
 Run one of the binary, then attach `pwndgb`. The memory heap can be extracted with the following command: 
@@ -55,12 +55,8 @@ om 3 0x562800205000 0x21000 0x898 rw- [heap]
 The same `nix profile install -f simpleheap.nix` command will also install jemalloc binaries:
 
 ```
-simplejemalloc-5.2.1
-simplejemalloc-5.3.0
+simpleheap-jemalloc-5.3.0
 ```
-
-For detailed jemalloc heap dumping instructions, see [JEMALLOC.md](JEMALLOC.md). 
-
 
 # Memory map configurations 
 simpleheap_linux_glibc-2.35_x64.bin
@@ -105,4 +101,3 @@ simpleheap_linux_jemalloc-5.30_x64.bin
 om 3 0x7f3c5b601100 0x138d0 0x0 rw- arena 
 om 3 0x7f3c5ae00000 0xa00000 0x138d0 rw- [heap]
 ```
-

@@ -25,20 +25,20 @@ let
       }) {};
     in
     targetPkgs.stdenv.mkDerivation {
-      name = "simpleheap-${glibcVer}";
+      name = "simpleheap-glibc-${glibcVer}";
       src = ./.;
       
       nativeBuildInputs = with targetPkgs; [ gcc ];
       buildInputs = with targetPkgs; [ stdenv.cc.cc.lib ];
       
       buildPhase = ''
-        gcc -o simpleheap-${glibcVer} simpleheap.c
+        gcc -o simpleheap-glibc-${glibcVer} simpleheap.c
       '';
       
       installPhase = ''
         mkdir -p $out/bin
-        cp simpleheap-${glibcVer} $out/bin/
-        chmod +x $out/bin/simpleheap-${glibcVer}
+        cp simpleheap-glibc-${glibcVer} $out/bin/
+        chmod +x $out/bin/simpleheap-glibc-${glibcVer}
       '';
     };
 
