@@ -1,6 +1,6 @@
 # Reproduction 
 
-## Linux 
+## Linux - glibc
 
 To reproduce these binary: 
 
@@ -50,6 +50,18 @@ om 3 0x7f01c9a07ac0 0x898 0x0 rw- arena
 om 3 0x562800205000 0x21000 0x898 rw- [heap]
 ```
 
+## Linux - jemalloc
+
+The same `nix profile install -f simpleheap.nix` command will also install jemalloc binaries:
+
+```
+simplejemalloc-5.2.1
+simplejemalloc-5.3.0
+```
+
+For detailed jemalloc heap dumping instructions, see [JEMALLOC.md](JEMALLOC.md). 
+
+
 # Memory map configurations 
 simpleheap_linux_glibc-2.35_x64.bin
 ```
@@ -85,5 +97,12 @@ simpleheap_linux_glibc-2.23_x64.bin
 ```
 om 3 0x7ff1c3f9bb20 0x898 0x0 rw- arena 
 om 3 0x2975e000 0x21000 0x898 rw- [heap]
+```
+
+
+simpleheap_linux_jemalloc-5.30_x64.bin
+```
+om 3 0x7f3c5b601100 0x138d0 0x0 rw- arena 
+om 3 0x7f3c5ae00000 0xa00000 0x138d0 rw- [heap]
 ```
 

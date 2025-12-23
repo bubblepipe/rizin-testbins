@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> {} }:
 
 let
-  # source: 
+  # source:
   # https://lazamar.co.uk/nix-versions/?channel=nixpkgs-unstable&package=glibc
   glibcVersions = {
     "2.23" = "cb5a2acaa118b61765fb59d176555535da582a62";  # 2016-08-17
@@ -12,7 +12,13 @@ let
     "2.35" = "1dfd0f069d2d348d732f81c813d842e15aa20da5";  # 2023-03-15 (2.35-224)
   };
 
-  mkSimpleheap = glibcVer: commitHash:
+  # source:
+  # https://lazamar.co.uk/nix-versions/?channel=nixpkgs-unstable&package=jemalloc
+  jemallocVersions = {
+    "5.3.0" = "e6f23dc08d3624daab7094b701aa3954923c6bbb";  # 2025-06-16
+  };
+
+  mkSimpleheapGlibc = glibcVer: commitHash:
     let
       targetPkgs = import (builtins.fetchTarball {
         url = "https://github.com/NixOS/nixpkgs/archive/${commitHash}.tar.gz";
@@ -36,10 +42,51 @@ let
       '';
     };
 
-  allBuilds = pkgs.lib.mapAttrs mkSimpleheap glibcVersions;
+  mkSimpleheapJemalloc = jemallocVer: commitHash:
+    let
+      targetPkgs = import (builtins.fetchTarball {
+        url = "https://github.com/NixOS/nixpkgs/archive/${commitHash}.tar.gz";
+      }) {};
+      # Use jemalloc with debug symbols and stats, prevent stripping
+      jemallocDebug = targetPkgs.jemalloc.overrideAttrs (oldAttrs: {
+        configureFlags = (oldAttrs.configureFlags or []) ++ [
+          "--enable-debug"
+          "--enable-prof"
+          "--enable-stats"
+        ];
+        dontStrip = true;
+        separateDebugInfo = false;
+      });
+    in
+    targetPkgs.stdenv.mkDerivation {
+      name = "simpleheap-jemalloc-${jemallocVer}";
+      src = ./.;
+
+      nativeBuildInputs = with targetPkgs; [ gcc ];
+      buildInputs = [ jemallocDebug ];
+
+      dontStrip = true;
+
+      buildPhase = ''
+        gcc -g -O0 -o simpleheap-jemalloc-${jemallocVer} simpleheap.c \
+          -DUSE_JEMALLOC \
+          -I${jemallocDebug}/include \
+          ${jemallocDebug}/lib/libjemalloc.a \
+          -lpthread -ldl -lm
+      '';
+
+      installPhase = ''
+        mkdir -p $out/bin
+        cp simpleheap-jemalloc-${jemallocVer} $out/bin/
+        chmod +x $out/bin/simpleheap-jemalloc-${jemallocVer}
+      '';
+    };
+
+  glibcBuilds = pkgs.lib.mapAttrs mkSimpleheapGlibc glibcVersions;
+  jemallocBuilds = pkgs.lib.mapAttrs mkSimpleheapJemalloc jemallocVersions;
 
 in
 pkgs.symlinkJoin {
   name = "simpleheap-all-versions";
-  paths = pkgs.lib.attrValues allBuilds;
+  paths = pkgs.lib.attrValues glibcBuilds ++ pkgs.lib.attrValues jemallocBuilds;
 }
